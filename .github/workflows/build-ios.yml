@@ -1,0 +1,42 @@
+name: Build iOS (unsigned)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cài Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cài dependencies
+        run: flutter pub get
+
+      - name: Tạo file .env
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+
+      - name: Build iOS (chưa ký)
+        run: flutter build ios --release --no-codesign --dart-define-from-file=.env
+
+      - name: Đóng gói thành file .ipa
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r debt_ledger-unsigned.ipa Payload
+
+      - name: Upload file .ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: debt_ledger-ipa
+          path: debt_ledger-unsigned.ipa
