@@ -22,7 +22,6 @@ build/
 
 # Platform build artifacts (chưa được tạo sẵn, sẽ sinh ra khi flutter create bổ sung platform)
 android/
-ios/
 macos/
 linux/
 windows/
